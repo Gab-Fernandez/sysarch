@@ -15,6 +15,59 @@ $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+// Handle End Session
+if (isset($_GET['end_session'])) {
+    $dec = $conn->prepare("UPDATE users SET remaining_session = remaining_session - 1 WHERE idnumber = ? AND remaining_session > 0");
+    $dec->bind_param("s", $student['idnumber']);
+    $dec->execute();
+    $dec->close();
+    
+    $end = $conn->prepare("UPDATE sit_in SET status = 'ended', time_end = NOW() WHERE idnumber = ? AND status = 'active'");
+    $end->bind_param("s", $student['idnumber']);
+    $end->execute();
+    $end->close();
+    
+    header("Location: student_dashboard.php");
+    exit();
+}
+
+// Handle Photo Upload
+if (isset($_POST['upload_photo']) && isset($_FILES['photo'])) {
+    $file = $_FILES['photo'];
+    if ($file['error'] === 0 && $file['size'] < 5000000) {
+        $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        
+        if (in_array($mime, $allowed)) {
+            $upload_dir = __DIR__ . '/uploads/';
+            if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+            
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'profile_' . $student['idnumber'] . '_' . time() . '.' . $ext;
+            $target_path = $upload_dir . $filename;
+            $web_path = 'uploads/' . $filename;
+            
+            if (move_uploaded_file($file['tmp_name'], $target_path)) {
+                $upd = $conn->prepare("UPDATE users SET profile_photo = ? WHERE id = ?");
+                $upd->bind_param("si", $web_path, $student['id']);
+                $upd->execute();
+                $upd->close();
+                
+                // Refresh student data
+                $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+                $stmt->bind_param("i", $_SESSION['student_id']);
+                $stmt->execute();
+                $student = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+            }
+        }
+    }
+    header("Location: student_dashboard.php");
+    exit();
+}
+
 // Fetch announcements
 $announcements = $conn->query(
     "SELECT * FROM announcements ORDER BY created_at DESC LIMIT 10"
@@ -339,12 +392,20 @@ $conn->close();
     <div class="panel-title">👤 Student Information</div>
     <div class="avatar-wrap">
       <div class="avatar-circle">
-        <?php if (!empty($student['profile_photo'])): ?>
+        <?php if (!empty($student['profile_photo']) && file_exists($student['profile_photo'])): ?>
           <img src="<?= htmlspecialchars($student['profile_photo']) ?>" alt="Photo"/>
         <?php else: ?>
           🎓
         <?php endif; ?>
       </div>
+      <form method="POST" enctype="multipart/form-data" style="margin-top:10px;" id="photoForm">
+        <input type="file" id="photo" name="photo" accept="image/*" style="display:none;" onchange="document.getElementById('photoLabel').textContent = this.files[0]?.name || '📷 Choose Photo'"/>
+        <label for="photo" id="photoLabel" style="display:inline-block;background:#1e4fa0;color:#fff;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;">
+          📷 Choose Photo
+        </label>
+        <input type="hidden" name="upload_photo" value="1"/>
+        <button type="submit" style="background:#27ae60;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;margin-top:5px;">Upload</button>
+      </form>
     </div>
     <div class="student-info">
       <div class="info-row">

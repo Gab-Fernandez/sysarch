@@ -8,19 +8,28 @@
 </head>
 <body>
   <header>
-    <img src="../uclogo.png" alt="UC Logo" class="logo" />
+    <img src="uclogo.png" alt="UC Logo" class="logo" />
     <h1>College of Computer Studies Sit-in Monitoring System</h1>
-    <img src="../ucmainccslogo.png" alt="CCS Logo" class="logo" />
+    <img src="ucmainccslogo.png" alt="CCS Logo" class="logo" />
   </header>
   <nav>
-    <a href="index.html">Home</a>
-    <a href="#">Community ▼</a>
-    <a href="#">About</a>
-    <a href="Register.html">Register</a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="#">Community ▼</a>
+      <a href="#">About</a>
+      <a href="Register.html">Register</a>
+    </div>
   </nav>
 
   <main>
-    
+    <section class="form-container" style="text-align:center;">
+      <h2>Welcome to CCS Sit-in System</h2>
+      <p style="margin-top:15px; color:#555;">Please login or register to continue.</p>
+      <div style="margin-top:25px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+        <a href="index.php" style="flex:1; min-width:120px; background:#0055a5; color:#fff; padding:12px 20px; border-radius:5px; text-decoration:none; font-weight:600;">Student Login</a>
+        <a href="admin_login.html" style="flex:1; min-width:120px; background:#1a5276; color:#fff; padding:12px 20px; border-radius:5px; text-decoration:none; font-weight:600;">Admin Login</a>
+      </div>
+    </section>
   </main>
 </body>
 </html>
