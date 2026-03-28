@@ -1,0 +1,273 @@
+<?php
+session_start();
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+$conn = new mysqli("localhost", "root", "", "sit_in_system");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Create reservations table if not exists
+$conn->query("CREATE TABLE IF NOT EXISTS reservations (
+    res_id INT AUTO_INCREMENT PRIMARY KEY,
+    idnumber VARCHAR(20) NOT NULL,
+    lab VARCHAR(20) NOT NULL,
+    reservation_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    purpose VARCHAR(50),
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+$message = "";
+$message_type = "";
+
+// Handle reservation creation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_reservation'])) {
+    $idnumber = trim($_POST['idnumber']);
+    $lab = trim($_POST['lab']);
+    $reservation_date = $_POST['reservation_date'];
+    $start_time = $_POST['start_time'];
+    $end_time = $_POST['end_time'];
+    $purpose = trim($_POST['purpose']);
+    
+    // Check student exists
+    $stmt = $conn->prepare("SELECT * FROM users WHERE idnumber = ?");
+    $stmt->bind_param("s", $idnumber);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        $message = "Student not found.";
+        $message_type = "error";
+    } else {
+        // Check for conflicting reservations
+        $check = $conn->prepare("SELECT * FROM reservations WHERE lab = ? AND reservation_date = ? 
+            AND ((start_time <= ? AND end_time > ?) OR (start_time < ? AND end_time >= ?))");
+        $check->bind_param("ssssss", $lab, $reservation_date, $start_time, $start_time, $end_time, $end_time);
+        $check->execute();
+        $conflict = $check->get_result();
+        
+        if ($conflict->num_rows > 0) {
+            $message = "Time slot conflict! Please choose a different time.";
+            $message_type = "error";
+        } else {
+            $insert = $conn->prepare("INSERT INTO reservations (idnumber, lab, reservation_date, start_time, end_time, purpose, status) 
+                VALUES (?, ?, ?, ?, ?, ?, 'pending')");
+            $insert->bind_param("ssssss", $idnumber, $lab, $reservation_date, $start_time, $end_time, $purpose);
+            
+            if ($insert->execute()) {
+                $message = "Reservation created successfully!";
+                $message_type = "success";
+            }
+        }
+    }
+}
+
+// Handle status updates
+if (isset($_GET['approve'])) {
+    $res_id = intval($_GET['approve']);
+    $conn->query("UPDATE reservations SET status = 'approved' WHERE res_id = $res_id");
+    $message = "Reservation approved.";
+    $message_type = "success";
+}
+
+if (isset($_GET['reject'])) {
+    $res_id = intval($_GET['reject']);
+    $conn->query("UPDATE reservations SET status = 'rejected' WHERE res_id = $res_id");
+    $message = "Reservation rejected.";
+    $message_type = "error";
+}
+
+// Get pending reservations
+$pending = $conn->query("SELECT r.*, u.firstname, u.lastname, u.course 
+    FROM reservations r 
+    LEFT JOIN users u ON r.idnumber = u.idnumber 
+    WHERE r.status = 'pending' 
+    ORDER BY r.reservation_date, r.start_time");
+
+// Get all reservations for today/tomorrow
+$upcoming = $conn->query("SELECT r.*, u.firstname, u.lastname, u.course 
+    FROM reservations r 
+    LEFT JOIN users u ON r.idnumber = u.idnumber 
+    WHERE r.reservation_date >= CURDATE() 
+    ORDER BY r.reservation_date, r.start_time 
+    LIMIT 20");
+
+// Labs available
+$labs = ['Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5', 'Lab 6'];
+$purposes = ['Programming', 'Research', 'Online Class', 'Project', 'Assignment', 'Printing', 'Other'];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CCS | Reservation</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .reservation-container { padding: 20px; }
+    .message { padding: 12px; border-radius: 4px; margin-bottom: 15px; }
+    .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-section, .list-section { background: #f8f9fa; padding: 20px; border-radius: 8px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .btn-submit { background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
+    .btn-submit:hover { background: #218838; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 0.9em; }
+    th { background: #1a5276; color: white; }
+    tr:nth-child(even) { background: white; }
+    .status-pending { background: #fff3cd; color: #856404; padding: 3px 8px; border-radius: 4px; }
+    .status-approved { background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 4px; }
+    .status-rejected { background: #f8d7da; color: #721c24; padding: 3px 8px; border-radius: 4px; }
+    .btn-approve { background: #28a745; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+    .btn-reject { background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+    .section-title { margin-top: 0; color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 10px; }
+    h3.section-title { margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="uclogo.png" alt="UC Logo" class="logo" />
+    <h1>College of Computer Studies Admin</h1>
+    <img src="ucmainccslogo.png" alt="CCS Logo" class="logo" />
+  </header>
+  <nav>
+    <a href="admin_dashboard.php">Home</a>
+    <a href="admin_search.php">Search</a>
+    <a href="admin_students.php">Students</a>
+    <a href="admin_sitin.php">Sit-in</a>
+    <a href="admin_sitin_records.php">View Sit-in Records</a>
+    <a href="admin_reports.php">Sit-in Reports</a>
+    <a href="admin_feedback.php">Feedback Reports</a>
+    <a href="admin_reservation.php">Reservation</a>
+    <a href="admin_logout.php" class="logout-btn">Log out</a>
+  </nav>
+  <main>
+    <div class="reservation-container">
+      <h2>🔖 Lab Reservation System</h2>
+      
+      <?php if ($message): ?>
+        <div class="message <?= $message_type ?>"><?= htmlspecialchars($message) ?></div>
+      <?php endif; ?>
+      
+      <div class="two-col">
+        <div class="form-section">
+          <h3 class="section-title">Create Reservation</h3>
+          <form method="POST" action="admin_reservation.php">
+            <div class="form-group">
+              <label for="idnumber">Student ID Number</label>
+              <input type="text" id="idnumber" name="idnumber" required placeholder="e.g., 2021-01234">
+            </div>
+            
+            <div class="form-group">
+              <label for="lab">Laboratory</label>
+              <select id="lab" name="lab" required>
+                <option value="">Select Laboratory</option>
+                <?php foreach ($labs as $lab): ?>
+                  <option value="<?= htmlspecialchars($lab) ?>"><?= htmlspecialchars($lab) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="reservation_date">Date</label>
+              <input type="date" id="reservation_date" name="reservation_date" required min="<?= date('Y-m-d') ?>">
+            </div>
+            
+            <div class="form-group">
+              <label for="start_time">Start Time</label>
+              <input type="time" id="start_time" name="start_time" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="end_time">End Time</label>
+              <input type="time" id="end_time" name="end_time" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="purpose">Purpose</label>
+              <select id="purpose" name="purpose" required>
+                <option value="">Select Purpose</option>
+                <?php foreach ($purposes as $p): ?>
+                  <option value="<?= htmlspecialchars($p) ?>"><?= htmlspecialchars($p) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            
+            <button type="submit" name="create_reservation" class="btn-submit">Create Reservation</button>
+          </form>
+        </div>
+        
+        <div class="list-section">
+          <h3 class="section-title">Pending Approvals</h3>
+          <?php if ($pending->num_rows > 0): ?>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Student</th>
+                  <th>Lab</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php while ($row = $pending->fetch_assoc()): ?>
+                  <tr>
+                    <td><?= date('M d, Y', strtotime($row['reservation_date'])) ?></td>
+                    <td><?= htmlspecialchars(($row['firstname'] ?? 'N/A') . ' ' . ($row['lastname'] ?? '')) ?></td>
+                    <td><?= htmlspecialchars($row['lab']) ?></td>
+                    <td><?= date('h:i A', strtotime($row['start_time'])) ?> - <?= date('h:i A', strtotime($row['end_time'])) ?></td>
+                    <td>
+                      <a class="btn-approve" href="admin_reservation.php?approve=<?= $row['res_id'] ?>" onclick="return confirm('Approve this reservation?')">✓</a>
+                      <a class="btn-reject" href="admin_reservation.php?reject=<?= $row['res_id'] ?>" onclick="return confirm('Reject this reservation?')">✗</a>
+                    </td>
+                  </tr>
+                <?php endwhile; ?>
+              </tbody>
+            </table>
+          <?php else: ?>
+            <p style="text-align: center; color: #666; padding: 20px;">No pending reservations.</p>
+          <?php endif; ?>
+          
+          <h3 class="section-title" style="margin-top: 25px;">Upcoming Reservations</h3>
+          <?php if ($upcoming->num_rows > 0): ?>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Student</th>
+                  <th>Lab</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php while ($row = $upcoming->fetch_assoc()): ?>
+                  <tr>
+                    <td><?= date('M d', strtotime($row['reservation_date'])) ?></td>
+                    <td><?= htmlspecialchars(($row['firstname'] ?? 'N/A') . ' ' . substr(($row['lastname'] ?? ''), 0, 1)) ?>.</td>
+                    <td><?= htmlspecialchars($row['lab']) ?></td>
+                    <td><span class="status-<?= $row['status'] ?>"><?= ucfirst($row['status']) ?></span></td>
+                  </tr>
+                <?php endwhile; ?>
+              </tbody>
+            </table>
+          <?php else: ?>
+            <p style="text-align: center; color: #666; padding: 20px;">No upcoming reservations.</p>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
