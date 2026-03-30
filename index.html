@@ -13,22 +13,32 @@
     <img src="ucmainccslogo.png" alt="CCS Logo" class="logo" />
   </header>
   <nav>
-    <div class="nav-links">
-      <a href="index.html" class="active">Home</a>
-      <a href="#">Community ▼</a>
-      <a href="#">About</a>
-      <a href="Register.html">Register</a>
-    </div>
+    <a href="index.html" class="active">Home</a>
+    <a href="Register.php">Register</a>
+    <a href="admin_login.php">Admin Login</a>
   </nav>
 
   <main>
-    <section class="form-container" style="text-align:center;">
+    <section class="form-container" style="text-align:center; max-width:420px;">
       <h2>Welcome to CCS Sit-in System</h2>
-      <p style="margin-top:15px; color:#555;">Please login or register to continue.</p>
-      <div style="margin-top:25px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-        <a href="index.php" style="flex:1; min-width:120px; background:#0055a5; color:#fff; padding:12px 20px; border-radius:5px; text-decoration:none; font-weight:600;">Student Login</a>
-        <a href="admin_login.html" style="flex:1; min-width:120px; background:#1a5276; color:#fff; padding:12px 20px; border-radius:5px; text-decoration:none; font-weight:600;">Admin Login</a>
+      <p style="margin-top:12px; color:#555; font-size:0.95rem;">Please login or register to continue.</p>
+      <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <a href="index.php"
+           style="flex:1; min-width:130px; background:#0055a5; color:#fff; padding:13px 20px;
+                  border-radius:6px; text-decoration:none; font-weight:700; font-size:0.95rem;
+                  transition:background 0.2s;"
+           onmouseover="this.style.background='#003d7a'"
+           onmouseout="this.style.background='#0055a5'">🎓 Student Login</a>
+        <a href="admin_login.php"
+           style="flex:1; min-width:130px; background:#1a5276; color:#fff; padding:13px 20px;
+                  border-radius:6px; text-decoration:none; font-weight:700; font-size:0.95rem;
+                  transition:background 0.2s;"
+           onmouseover="this.style.background='#0a3d62'"
+           onmouseout="this.style.background='#1a5276'">🔐 Admin Login</a>
       </div>
+      <p style="margin-top:20px; font-size:0.88rem; color:#666;">
+        New student? <a href="Register.php" style="color:#1a5276; font-weight:600;">Register here</a>
+      </p>
     </section>
   </main>
 </body>

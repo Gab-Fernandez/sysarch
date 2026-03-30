@@ -12,15 +12,13 @@ $student = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 // Unread notifications count
-$nq = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE idnumber = ? AND is_read = 0");
+$nq = $conn->prepare("SELECT COUNT(*) as cnt FROM notifications WHERE idnumber = ? AND is_read = 0");
 $nq->bind_param("s", $student['idnumber']);
 $nq->execute();
-$nq->bind_result($unread_count);
-$nq->fetch();
+$unread_count = $nq->get_result()->fetch_assoc()['cnt'] ?? 0;
 $nq->close();
 
-$message = "";
-$message_type = "";
+$message = ""; $message_type = "";
 $labs     = ['Lab 1','Lab 2','Lab 3','Lab 4','Lab 5','Lab 6'];
 $purposes = ['Programming','Research','Online Class','Project','Assignment','Printing','Internet','Other'];
 
@@ -36,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "End time must be after start time.";
         $message_type = "error";
     } else {
-        // Check conflict
         $chk = $conn->prepare(
             "SELECT res_id FROM reservations
              WHERE lab = ? AND reservation_date = ?
@@ -88,31 +85,21 @@ $conn->close();
   <title>CCS | Reservation</title>
   <link rel="stylesheet" href="style.css"/>
   <style>
-    .top-nav { background:#1d3f7a; display:flex; padding:0 16px; border-bottom:3px solid #0f2a55; }
-    .top-nav a { color:#c8d8f5; padding:11px 14px; font-weight:600; text-decoration:none; font-size:13px; }
-    .top-nav a.active, .top-nav a:hover { background:rgba(255,255,255,0.13); color:#fff; }
-    .top-nav .logout { margin-left:auto; background:#c0392b; color:#fff !important; padding:11px 18px; }
-    .notif-wrap { position:relative; display:inline-flex; }
-    .notif-badge { position:absolute; right:4px; top:6px; background:#e74c3c; color:#fff;
-                   font-size:10px; font-weight:700; border-radius:50%; width:16px; height:16px;
-                   display:flex; align-items:center; justify-content:center; }
-    .page-wrap { display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:24px; }
-    .card { background:#fff; border-radius:8px; padding:20px; box-shadow:0 1px 6px rgba(0,0,0,0.07); }
-    .card h3 { color:#1a5276; border-bottom:2px solid #1a5276; padding-bottom:8px; margin-bottom:16px; }
-    .form-group { margin-bottom:14px; }
-    .form-group label { display:block; font-weight:600; margin-bottom:4px; font-size:0.9rem; }
-    .form-group input, .form-group select { width:100%; padding:9px 11px; border:1px solid #ccc; border-radius:5px; }
-    .btn-submit { background:#28a745; color:#fff; border:none; padding:11px; width:100%; border-radius:5px; font-size:1rem; font-weight:600; cursor:pointer; }
-    .btn-submit:hover { background:#218838; }
-    .msg-success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; padding:10px 14px; border-radius:5px; margin-bottom:14px; }
-    .msg-error   { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; padding:10px 14px; border-radius:5px; margin-bottom:14px; }
-    table { width:100%; border-collapse:collapse; font-size:0.88rem; }
-    th,td { padding:9px 10px; border-bottom:1px solid #e5e9f0; text-align:left; }
-    th { background:#1a5276; color:#fff; }
-    .status-pending  { background:#fff3cd; color:#856404; padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:700; }
-    .status-approved { background:#d4edda; color:#155724; padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:700; }
-    .status-rejected { background:#f8d7da; color:#721c24; padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:700; }
-    @media(max-width:700px){ .page-wrap{grid-template-columns:1fr;} }
+    .page-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; }
+    .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); }
+    .card h3 { color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 8px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.88rem; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 9px 11px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem;
+    }
+    .btn-submit {
+      background: #28a745; color: #fff; border: none;
+      padding: 11px; width: 100%; border-radius: 5px;
+      font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-submit:hover { background: #218838; }
+    @media(max-width: 700px) { .page-wrap { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -123,7 +110,7 @@ $conn->close();
   </header>
   <nav class="top-nav">
     <div class="notif-wrap">
-      <a href="student_notifications.php">🔔 Notification</a>
+      <a href="student_notifications.php">🔔 Notifications</a>
       <?php if ($unread_count > 0): ?>
         <span class="notif-badge"><?= $unread_count ?></span>
       <?php endif; ?>
@@ -132,6 +119,7 @@ $conn->close();
     <a href="student_edit_profile.php">Edit Profile</a>
     <a href="student_history.php">History</a>
     <a href="student_reservation.php" class="active">Reservation</a>
+    <span class="spacer"></span>
     <a href="student_logout.php" class="logout">Log out</a>
   </nav>
   <main>
@@ -180,23 +168,31 @@ $conn->close();
       <!-- My Reservations -->
       <div class="card">
         <h3>📋 My Reservations</h3>
-        <?php if ($reservations->num_rows > 0): ?>
-          <table>
-            <thead>
-              <tr><th>Date</th><th>Lab</th><th>Time</th><th>Purpose</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <?php while ($r = $reservations->fetch_assoc()): ?>
+        <?php if ($reservations && $reservations->num_rows > 0): ?>
+          <div class="table-wrap">
+            <table>
+              <thead>
                 <tr>
-                  <td><?= date('M d, Y', strtotime($r['reservation_date'])) ?></td>
-                  <td><?= htmlspecialchars($r['lab']) ?></td>
-                  <td><?= date('h:i A', strtotime($r['start_time'])) ?>–<?= date('h:i A', strtotime($r['end_time'])) ?></td>
-                  <td><?= htmlspecialchars($r['purpose']) ?></td>
-                  <td><span class="status-<?= $r['status'] ?>"><?= ucfirst($r['status']) ?></span></td>
+                  <th>Date</th>
+                  <th>Lab</th>
+                  <th>Time</th>
+                  <th>Purpose</th>
+                  <th>Status</th>
                 </tr>
-              <?php endwhile; ?>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <?php while ($r = $reservations->fetch_assoc()): ?>
+                  <tr>
+                    <td><?= date('M d, Y', strtotime($r['reservation_date'])) ?></td>
+                    <td><?= htmlspecialchars($r['lab']) ?></td>
+                    <td><?= date('h:i A', strtotime($r['start_time'])) ?>–<?= date('h:i A', strtotime($r['end_time'])) ?></td>
+                    <td><?= htmlspecialchars($r['purpose']) ?></td>
+                    <td><span class="status-<?= $r['status'] ?>"><?= ucfirst($r['status']) ?></span></td>
+                  </tr>
+                <?php endwhile; ?>
+              </tbody>
+            </table>
+          </div>
         <?php else: ?>
           <p style="color:#999; text-align:center; padding:30px;">No reservations yet.</p>
         <?php endif; ?>

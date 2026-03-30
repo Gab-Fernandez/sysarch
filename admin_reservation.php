@@ -84,6 +84,61 @@ if (isset($_GET['reject'])) {
     $message_type = "error";
 }
 
+// Handle start sit-in from approved reservation
+if (isset($_GET['start_sitin'])) {
+    $res_id = intval($_GET['start_sitin']);
+    
+    // Get the reservation details
+    $res_stmt = $conn->prepare("SELECT r.*, u.firstname, u.lastname, u.remaining_session 
+                                FROM reservations r 
+                                LEFT JOIN users u ON r.idnumber = u.idnumber 
+                                WHERE r.res_id = ?");
+    $res_stmt->bind_param("i", $res_id);
+    $res_stmt->execute();
+    $reservation = $res_stmt->get_result()->fetch_assoc();
+    $res_stmt->close();
+    
+    if ($reservation) {
+        if ($reservation['remaining_session'] <= 0) {
+            $message = "Student has no remaining sessions.";
+            $message_type = "error";
+        } else {
+            // Check if student already has an active sit-in
+            $chk = $conn->prepare("SELECT sit_id FROM sit_in WHERE idnumber = ? AND status = 'active'");
+            $chk->bind_param("s", $reservation['idnumber']);
+            $chk->execute();
+            $chk->store_result();
+            
+            if ($chk->num_rows > 0) {
+                $message = "Student already has an active sit-in session.";
+                $message_type = "error";
+            } else {
+                // Create sit-in record
+                $now = date('Y-m-d H:i:s');
+                $ins = $conn->prepare("INSERT INTO sit_in (idnumber, lab, purpose, session_date, status) VALUES (?, ?, ?, ?, 'active')");
+                $ins->bind_param("ssss", $reservation['idnumber'], $reservation['lab'], $reservation['purpose'], $now);
+                
+                if ($ins->execute()) {
+                    // Decrement remaining sessions
+                    $new_sess = $reservation['remaining_session'] - 1;
+                    $upd = $conn->prepare("UPDATE users SET remaining_session = ? WHERE idnumber = ?");
+                    $upd->bind_param("is", $new_sess, $reservation['idnumber']);
+                    $upd->execute();
+                    $upd->close();
+                    
+                    $message = "Sit-in session started for " . htmlspecialchars($reservation['firstname'] . ' ' . $reservation['lastname']) . ".";
+                    $message_type = "success";
+                } else {
+                    $message = "Failed to start sit-in.";
+                    $message_type = "error";
+                }
+                $ins->close();
+            }
+            $chk->close();
+        }
+    }
+}
+
 // Get pending reservations
 $pending = $conn->query("SELECT r.*, u.firstname, u.lastname, u.course 
     FROM reservations r 
@@ -91,13 +146,12 @@ $pending = $conn->query("SELECT r.*, u.firstname, u.lastname, u.course
     WHERE r.status = 'pending' 
     ORDER BY r.reservation_date, r.start_time");
 
-// Get all reservations for today/tomorrow
-$upcoming = $conn->query("SELECT r.*, u.firstname, u.lastname, u.course 
+// Get approved reservations
+$approved = $conn->query("SELECT r.*, u.firstname, u.lastname, u.course, u.remaining_session 
     FROM reservations r 
     LEFT JOIN users u ON r.idnumber = u.idnumber 
-    WHERE r.reservation_date >= CURDATE() 
-    ORDER BY r.reservation_date, r.start_time 
-    LIMIT 20");
+    WHERE r.status = 'approved' 
+    ORDER BY r.reservation_date, r.start_time");
 
 // Labs available
 $labs = ['Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5', 'Lab 6'];
@@ -131,6 +185,8 @@ $purposes = ['Programming', 'Research', 'Online Class', 'Project', 'Assignment',
     .status-rejected { background: #f8d7da; color: #721c24; padding: 3px 8px; border-radius: 4px; }
     .btn-approve { background: #28a745; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
     .btn-reject { background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+    .btn-startsitin { background: #007bff; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; text-decoration: none; }
+    .btn-startsitin:hover { background: #0056b3; }
     .section-title { margin-top: 0; color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 10px; }
     h3.section-title { margin-bottom: 15px; }
   </style>
@@ -240,30 +296,36 @@ $purposes = ['Programming', 'Research', 'Online Class', 'Project', 'Assignment',
             <p style="text-align: center; color: #666; padding: 20px;">No pending reservations.</p>
           <?php endif; ?>
           
-          <h3 class="section-title" style="margin-top: 25px;">Upcoming Reservations</h3>
-          <?php if ($upcoming->num_rows > 0): ?>
+          <h3 class="section-title" style="margin-top: 25px;">Approved Reservations</h3>
+          <?php if ($approved->num_rows > 0): ?>
             <table>
               <thead>
                 <tr>
                   <th>Date</th>
                   <th>Student</th>
                   <th>Lab</th>
-                  <th>Status</th>
+                  <th>Time</th>
+                  <th>Sessions</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                <?php while ($row = $upcoming->fetch_assoc()): ?>
+                <?php while ($row = $approved->fetch_assoc()): ?>
                   <tr>
-                    <td><?= date('M d', strtotime($row['reservation_date'])) ?></td>
-                    <td><?= htmlspecialchars(($row['firstname'] ?? 'N/A') . ' ' . substr(($row['lastname'] ?? ''), 0, 1)) ?>.</td>
+                    <td><?= date('M d, Y', strtotime($row['reservation_date'])) ?></td>
+                    <td><?= htmlspecialchars(($row['firstname'] ?? 'N/A') . ' ' . ($row['lastname'] ?? '')) ?></td>
                     <td><?= htmlspecialchars($row['lab']) ?></td>
-                    <td><span class="status-<?= $row['status'] ?>"><?= ucfirst($row['status']) ?></span></td>
+                    <td><?= date('h:i A', strtotime($row['start_time'])) ?> - <?= date('h:i A', strtotime($row['end_time'])) ?></td>
+                    <td><?= $row['remaining_session'] ?></td>
+                    <td>
+                      <a class="btn-startsitin" href="admin_reservation.php?start_sitin=<?= $row['res_id'] ?>" onclick="return confirm('Start sit-in session for this reservation?')">▶ Start Sit-in</a>
+                    </td>
                   </tr>
                 <?php endwhile; ?>
               </tbody>
             </table>
           <?php else: ?>
-            <p style="text-align: center; color: #666; padding: 20px;">No upcoming reservations.</p>
+            <p style="text-align: center; color: #666; padding: 20px;">No approved reservations.</p>
           <?php endif; ?>
         </div>
       </div>

@@ -19,7 +19,7 @@ $currentSitin  = $conn->query("SELECT COUNT(*) as c FROM sit_in WHERE status='ac
 $totalSitin    = $conn->query("SELECT COUNT(*) as c FROM sit_in")->fetch_assoc()['c'];
 
 // Pie chart data — sit-in by purpose
-$purposeResult = $conn->query("SELECT purpose, COUNT(*) as count FROM sit_in GROUP BY purpose");
+$purposeResult = $conn->query("SELECT purpose, COUNT(*) as count FROM sit_in GROUP BY purpose ORDER BY count DESC");
 $purposes = []; $counts = [];
 while ($row = $purposeResult->fetch_assoc()) {
     $purposes[] = $row['purpose'];
@@ -42,7 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['announcement'])) {
 // Handle delete announcement
 if (isset($_GET['delete_ann'])) {
     $aid = intval($_GET['delete_ann']);
-    $conn->query("DELETE FROM announcements WHERE id = $aid");
+    $stmt = $conn->prepare("DELETE FROM announcements WHERE id = ?");
+    $stmt->bind_param("i", $aid);
+    $stmt->execute();
+    $stmt->close();
     header("Location: admin_dashboard.php");
     exit();
 }
@@ -69,9 +72,9 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
   <a href="admin_search.php">Search</a>
   <a href="admin_students.php">Students</a>
   <a href="admin_sitin.php">Sit-in</a>
-  <a href="admin_sitin_records.php">View Sit-in Records</a>
-  <a href="admin_reports.php">Sit-in Reports</a>
-  <a href="admin_feedback.php">Feedback Reports</a>
+  <a href="admin_sitin_records.php">Sit-in Records</a>
+  <a href="admin_reports.php">Reports</a>
+  <a href="admin_feedback.php">Feedback</a>
   <a href="admin_reservation.php">Reservation</a>
   <a href="admin_logout.php" class="logout-btn">Log out</a>
 </nav>
@@ -82,31 +85,33 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
     <div class="dash-card">
       <div class="dash-card-header">📊 Statistics</div>
       <div class="dash-stats">
-        <p><strong>Students Registered:</strong> <?= $totalStudents ?></p>
-        <p><strong>Currently Sit-in:</strong> <?= $currentSitin ?></p>
-        <p><strong>Total Sit-in:</strong> <?= $totalSitin ?></p>
+        <p>👥 <strong>Students Registered:</strong> <?= $totalStudents ?></p>
+        <p>🟢 <strong>Currently Sit-in:</strong> <?= $currentSitin ?></p>
+        <p>📋 <strong>Total Sit-in:</strong> <?= $totalSitin ?></p>
       </div>
-      <canvas id="sitinChart" style="max-height:300px;"></canvas>
+      <div style="padding:0 16px 16px;">
+        <canvas id="sitinChart" style="max-height:300px;"></canvas>
+      </div>
     </div>
 
     <!-- RIGHT: Announcements -->
     <div class="dash-card">
-      <div class="dash-card-header">📢 Announcement</div>
+      <div class="dash-card-header">📢 Announcements</div>
       <form method="POST" action="admin_dashboard.php" style="padding:14px 16px 0;">
         <textarea name="announcement"
-                  placeholder="New Announcement"
+                  placeholder="Type a new announcement..."
                   style="width:100%;height:80px;padding:8px;border:1px solid #ccc;
                          border-radius:4px;resize:vertical;font-size:0.9rem;"></textarea>
         <button type="submit"
                 style="margin-top:8px;background:#28a745;color:#fff;border:none;
                        padding:8px 20px;border-radius:4px;cursor:pointer;font-weight:600;">
-          Submit
+          Post Announcement
         </button>
       </form>
 
       <div style="padding:14px 16px;">
-        <h4 style="margin-bottom:10px;color:#1a5276;">Posted Announcement</h4>
-        <?php if ($announcements->num_rows > 0):
+        <h4 style="margin-bottom:10px;color:#1a5276;">Posted Announcements</h4>
+        <?php if ($announcements && $announcements->num_rows > 0):
           while ($ann = $announcements->fetch_assoc()): ?>
           <div class="ann-item">
             <div class="ann-meta">
@@ -118,7 +123,7 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
             <div class="ann-body"><?= nl2br(htmlspecialchars($ann['content'])) ?></div>
           </div>
         <?php endwhile; else: ?>
-          <p style="color:#999;">No announcements yet.</p>
+          <p style="color:#999;font-size:0.9rem;">No announcements yet.</p>
         <?php endif; ?>
       </div>
     </div>
@@ -138,7 +143,10 @@ new Chart(document.getElementById('sitinChart'), {
       backgroundColor: ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22','#34495e']
     }]
   },
-  options: { responsive: true, plugins: { legend: { position: 'top' } } }
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'top' } }
+  }
 });
 </script>
 </body>
