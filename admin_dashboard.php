@@ -76,6 +76,8 @@ $announcements = $conn->query("SELECT * FROM announcements ORDER BY created_at D
   <a href="admin_reports.php">Reports</a>
   <a href="admin_feedback.php">Feedback</a>
   <a href="admin_reservation.php">Reservation</a>
+  <a href="admin_leaderboard.php">Leaderboard</a>
+  <a href="admin_analytics.php">Analytics</a>
   <a href="admin_logout.php" class="logout-btn">Log out</a>
 </nav>
 <main>

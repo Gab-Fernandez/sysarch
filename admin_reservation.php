@@ -27,48 +27,6 @@ $conn->query("CREATE TABLE IF NOT EXISTS reservations (
 $message = "";
 $message_type = "";
 
-// Handle reservation creation
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_reservation'])) {
-    $idnumber = trim($_POST['idnumber']);
-    $lab = trim($_POST['lab']);
-    $reservation_date = $_POST['reservation_date'];
-    $start_time = $_POST['start_time'];
-    $end_time = $_POST['end_time'];
-    $purpose = trim($_POST['purpose']);
-    
-    // Check student exists
-    $stmt = $conn->prepare("SELECT * FROM users WHERE idnumber = ?");
-    $stmt->bind_param("s", $idnumber);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows === 0) {
-        $message = "Student not found.";
-        $message_type = "error";
-    } else {
-        // Check for conflicting reservations
-        $check = $conn->prepare("SELECT * FROM reservations WHERE lab = ? AND reservation_date = ? 
-            AND ((start_time <= ? AND end_time > ?) OR (start_time < ? AND end_time >= ?))");
-        $check->bind_param("ssssss", $lab, $reservation_date, $start_time, $start_time, $end_time, $end_time);
-        $check->execute();
-        $conflict = $check->get_result();
-        
-        if ($conflict->num_rows > 0) {
-            $message = "Time slot conflict! Please choose a different time.";
-            $message_type = "error";
-        } else {
-            $insert = $conn->prepare("INSERT INTO reservations (idnumber, lab, reservation_date, start_time, end_time, purpose, status) 
-                VALUES (?, ?, ?, ?, ?, ?, 'pending')");
-            $insert->bind_param("ssssss", $idnumber, $lab, $reservation_date, $start_time, $end_time, $purpose);
-            
-            if ($insert->execute()) {
-                $message = "Reservation created successfully!";
-                $message_type = "success";
-            }
-        }
-    }
-}
-
 // Handle status updates
 if (isset($_GET['approve'])) {
     $res_id = intval($_GET['approve']);
@@ -153,9 +111,6 @@ $approved = $conn->query("SELECT r.*, u.firstname, u.lastname, u.course, u.remai
     WHERE r.status = 'approved' 
     ORDER BY r.reservation_date, r.start_time");
 
-// Labs available
-$labs = ['Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5', 'Lab 6'];
-$purposes = ['Programming', 'Research', 'Online Class', 'Project', 'Assignment', 'Printing', 'Other'];
 ?>
 
 <!DOCTYPE html>
@@ -169,7 +124,7 @@ $purposes = ['Programming', 'Research', 'Online Class', 'Project', 'Assignment',
     .message { padding: 12px; border-radius: 4px; margin-bottom: 15px; }
     .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .two-col { display: grid; grid-template-columns: 1fr; gap: 20px; }
     .form-section, .list-section { background: #f8f9fa; padding: 20px; border-radius: 8px; }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
@@ -217,54 +172,7 @@ $purposes = ['Programming', 'Research', 'Online Class', 'Project', 'Assignment',
       <?php endif; ?>
       
       <div class="two-col">
-        <div class="form-section">
-          <h3 class="section-title">Create Reservation</h3>
-          <form method="POST" action="admin_reservation.php">
-            <div class="form-group">
-              <label for="idnumber">Student ID Number</label>
-              <input type="text" id="idnumber" name="idnumber" required placeholder="e.g., 2021-01234">
-            </div>
-            
-            <div class="form-group">
-              <label for="lab">Laboratory</label>
-              <select id="lab" name="lab" required>
-                <option value="">Select Laboratory</option>
-                <?php foreach ($labs as $lab): ?>
-                  <option value="<?= htmlspecialchars($lab) ?>"><?= htmlspecialchars($lab) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="reservation_date">Date</label>
-              <input type="date" id="reservation_date" name="reservation_date" required min="<?= date('Y-m-d') ?>">
-            </div>
-            
-            <div class="form-group">
-              <label for="start_time">Start Time</label>
-              <input type="time" id="start_time" name="start_time" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="end_time">End Time</label>
-              <input type="time" id="end_time" name="end_time" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="purpose">Purpose</label>
-              <select id="purpose" name="purpose" required>
-                <option value="">Select Purpose</option>
-                <?php foreach ($purposes as $p): ?>
-                  <option value="<?= htmlspecialchars($p) ?>"><?= htmlspecialchars($p) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            
-            <button type="submit" name="create_reservation" class="btn-submit">Create Reservation</button>
-          </form>
-        </div>
-        
-        <div class="list-section">
+        <div class="list-section" style="grid-column: 1 / -1;">
           <h3 class="section-title">Pending Approvals</h3>
           <?php if ($pending->num_rows > 0): ?>
             <table>
