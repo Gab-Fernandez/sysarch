@@ -51,7 +51,7 @@ $records = $conn->query("
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>CCS | Sit-in Records</title>
+  <title>CCS | View Sit-in Records</title>
   <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -93,7 +93,7 @@ $records = $conn->query("
   <a href="admin_search.php">Search</a>
   <a href="admin_students.php">Students</a>
   <a href="admin_sitin.php">Sit-in</a>
-  <a href="admin_sitin_records.php" class="active">View Sit-in Records</a>
+  <a href="admin_sitin_records.php" class="active">View View Sit-in Records</a>
   <a href="admin_reports.php">Sit-in Reports</a>
   <a href="admin_feedback.php">Feedback Reports</a>
   <a href="admin_reservation.php">Reservation</a>
@@ -101,7 +101,7 @@ $records = $conn->query("
 </nav>
 <main style="padding:24px;">
 
-  <h2 style="color:#1a3a6b; margin-bottom:20px; text-align:center;">Current Sit-in Records</h2>
+  <h2 style="color:#1a3a6b; margin-bottom:20px; text-align:center;">Current View Sit-in Records</h2>
 
   <!-- Two pie charts matching photo -->
   <div class="charts-row">

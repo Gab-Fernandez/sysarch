@@ -167,7 +167,7 @@ $courses = ['BS Computer Science','BS Information Technology','BS Computer Engin
   <a href="admin_search.php">Search</a>
   <a href="admin_students.php" class="active">Students</a>
   <a href="admin_sitin.php">Sit-in</a>
-  <a href="admin_sitin_records.php">View Sit-in Records</a>
+  <a href="admin_sitin_records.php">View View Sit-in Records</a>
   <a href="admin_reports.php">Sit-in Reports</a>
   <a href="admin_feedback.php">Feedback Reports</a>
   <a href="admin_reservation.php">Reservation</a>

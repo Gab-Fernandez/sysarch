@@ -74,7 +74,7 @@ $purposes_list = $conn->query("SELECT DISTINCT purpose FROM sit_in WHERE purpose
   <a href="admin_search.php">Search</a>
   <a href="admin_students.php">Students</a>
   <a href="admin_sitin.php">Sit-in</a>
-  <a href="admin_sitin_records.php">Sit-in Records</a>
+  <a href="admin_sitin_records.php">View Sit-in Records</a>
   <a href="admin_reports.php" class="active">Reports</a>
   <a href="admin_feedback.php">Feedback</a>
   <a href="admin_reservation.php">Reservation</a>

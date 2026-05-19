@@ -251,7 +251,7 @@ $conn->close();
   <div class="table-card">
     <div class="table-card-head">
       <h3>📅 Sessions Table</h3>
-      <span style="font-size:0.8rem; opacity:0.8;">All sit-in records</span>
+      <span style="font-size:0.8rem; opacity:0.8;">All View Sit-in Records</span>
     </div>
     <div class="table-wrap">
       <table>

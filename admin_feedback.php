@@ -55,7 +55,7 @@ $avg_rating = $conn->query("SELECT AVG(rating) as avg_rating FROM feedback")->fe
     <a href="admin_search.php">Search</a>
     <a href="admin_students.php">Students</a>
     <a href="admin_sitin.php">Sit-in</a>
-    <a href="admin_sitin_records.php">Sit-in Records</a>
+    <a href="admin_sitin_records.php">View Sit-in Records</a>
     <a href="admin_reports.php">Reports</a>
     <a href="admin_feedback.php" class="active">Feedback</a>
     <a href="admin_reservation.php">Reservation</a>
