@@ -204,19 +204,9 @@ $conn->close();
   <img src="uclogo.png" alt="UC Logo" class="logo"/>
   <h1>College of Computer Studies Sit-in Monitoring System</h1>
   <img src="ucmainccslogo.png" alt="CCS Logo" class="logo"/>
+
 </header>
-<nav class="top-nav">
-  <div class="notif-wrap">
-    <a href="student_notifications.php">🔔 Notification</a>
-    <?php if ($unread_count > 0): ?><span class="notif-badge"><?= $unread_count ?></span><?php endif; ?>
-  </div>
-  <a href="student_dashboard.php">Home</a>
-  <a href="student_edit_profile.php">Edit Profile</a>
-  <a href="student_history.php" class="active">History &amp; Feedback</a>
-  <a href="student_reservation.php">Reservation</a>
-  <span class="spacer"></span>
-  <a href="student_logout.php" class="logout">Log out</a>
-</nav>
+<?php include 'nav_student.php'; ?>
 
 <main>
 <div class="page-wrap">

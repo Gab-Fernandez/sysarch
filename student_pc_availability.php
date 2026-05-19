@@ -17,8 +17,6 @@ $unread_count = $nq->get_result()->fetch_assoc()['cnt'] ?? 0; $nq->close();
 $labs = [
     '524' => 50, '526' => 50, '528' => 50,
     '530' => 50, '542' => 50, 'Mac Lab' => 20,
-    'Lab 1' => 30, 'Lab 2' => 30, 'Lab 3' => 30,
-    'Lab 4' => 30, 'Lab 5' => 30, 'Lab 6' => 30,
 ];
 
 $selected_lab = isset($_GET['lab']) ? $_GET['lab'] : array_key_first($labs);
@@ -212,20 +210,7 @@ function getPcStatus($pcLabel, $sitin, $reserved, $unavailable) {
   <h1>College of Computer Studies Sit-in Monitoring System</h1>
   <img src="ucmainccslogo.png" alt="CCS Logo" class="logo"/>
 </header>
-<nav class="top-nav">
-  <a href="student_dashboard.php">🏠 Home</a>
-  <a href="student_edit_profile.php">✏️ Profile</a>
-  <a href="student_history.php">📋 History</a>
-  <a href="student_reservation.php">🔖 Reservation</a>
-  <a href="student_software.php">💻 Software</a>
-  <a href="student_pc_availability.php" class="active">🖥️ PC Availability</a>
-  <div class="notif-wrap">
-    <a href="student_notifications.php">🔔 Notification</a>
-    <?php if ($unread_count > 0): ?><span class="notif-badge"><?= $unread_count ?></span><?php endif; ?>
-  </div>
-  <span class="spacer"></span>
-  <a href="student_logout.php" class="logout">Log out</a>
-</nav>
+<?php include 'nav_student.php'; ?>
 
 <main>
 <div class="page-wrap">

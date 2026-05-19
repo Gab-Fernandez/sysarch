@@ -244,20 +244,9 @@ $records     = $conn->query("SELECT s.*,u.firstname,u.lastname,u.remaining_sessi
   <img src="uclogo.png" alt="UC Logo" class="logo"/>
   <h1>College of Computer Studies Admin</h1>
   <img src="ucmainccslogo.png" alt="CCS Logo" class="logo"/>
+
 </header>
-<nav>
-  <a href="admin_dashboard.php">Home</a>
-  <a href="admin_search.php">Search</a>
-  <a href="admin_students.php">Students</a>
-  <a href="admin_sitin.php" class="active">Sit-in</a>
-  <a href="admin_sitin_records.php">View Sit-in Records</a>
-  <a href="admin_reports.php">Reports</a>
-  <a href="admin_feedback.php">Feedback</a>
-  <a href="admin_reservation.php">Reservation</a>
-  <a href="admin_leaderboard.php">Leaderboard</a>
-  <a href="admin_analytics.php">Analytics</a>
-  <a href="admin_logout.php" class="logout-btn">Log out</a>
-</nav>
+<?php include 'nav_admin.php'; ?>
 
 <main>
   <?php if ($message): ?>

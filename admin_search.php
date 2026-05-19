@@ -39,17 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
     <h1>College of Computer Studies Admin</h1>
     <img src="ucmainccslogo.png" alt="CCS Logo" class="logo" />
   </header>
-  <nav>
-    <a href="admin_dashboard.php">Home</a>
-    <a href="admin_search.php">Search</a>
-    <a href="admin_students.php">Students</a>
-    <a href="admin_sitin.php">Sit-in</a>
-    <a href="admin_sitin_records.php">View Sit-in Records</a>
-    <a href="admin_reports.php">Sit-in Reports</a>
-    <a href="admin_feedback.php">Feedback Reports</a>
-    <a href="admin_reservation.php">Reservation</a>
-    <a href="admin_logout.php" class="logout-btn">Log out</a>
-  </nav>
+  <?php include 'nav_admin.php'; ?>
   <main>
     <div class="search-container">
       <h2>Search Student</h2>

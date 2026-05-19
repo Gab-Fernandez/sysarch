@@ -174,24 +174,7 @@ $sess_color = $sess_left<=5?'#e74c3c':($sess_left<=10?'#f39c12':'#27ae60');
   <img src="ucmainccslogo.png" alt="CCS Logo"/>
 </div>
 
-<nav class="top-nav">
-  <a href="student_dashboard.php" class="active">🏠 Home</a>
-  <a href="student_edit_profile.php">✏️ Edit Profile</a>
-  <a href="student_history.php">📋 History &amp; Feedback</a>
-  <a href="student_software.php">💻 Software</a>
-  <a href="student_pc_availability.php">🖥️ PC Availability</a>
-  <div class="notif-wrap">
-    <a href="student_notifications.php">🔔 Notification</a>
-    <?php if ($unread_count > 0): ?><span class="notif-badge"><?= $unread_count ?></span><?php endif; ?>
-  </div>
-  <?php if ($resEnabled): ?>
-    <a href="student_reservation.php">🔖 Reservation</a>
-  <?php else: ?>
-    <a href="#" style="opacity:0.45;cursor:not-allowed;" title="Reservations are currently disabled">🔖 Reservation</a>
-  <?php endif; ?>
-  <span class="spacer"></span>
-  <a href="student_logout.php" class="logout">Log out</a>
-</nav>
+<?php include 'nav_student.php'; ?>
 
 <div class="page-body">
   <!-- LEFT: Student Profile -->
@@ -224,25 +207,7 @@ $sess_color = $sess_left<=5?'#e74c3c':($sess_left<=10?'#f39c12':'#27ae60');
       <div class="info-row"><span class="info-icon">📊</span><div><span class="info-label">Total Sit-in Hours</span><span class="info-value" style="font-weight:700;color:#93c5fd;"><?= fmtM($totalMins) ?> (<?= $totalSess ?> sessions)</span></div></div>
     </div>
 
-    <div class="divider"></div>
-    <div class="sidebar-nav">
-      <div class="sidebar-nav-title">Quick Access</div>
-      <a href="student_edit_profile.php" class="snav-btn"><span class="ico">✏️</span> Edit Profile</a>
-      <a href="student_dashboard.php#announcements" class="snav-btn"><span class="ico">📢</span> View Announcement</a>
-      <a href="student_dashboard.php#rules" class="snav-btn"><span class="ico">📋</span> Lab Rules &amp; Regulation</a>
-      <a href="student_history.php" class="snav-btn"><span class="ico">📁</span> History &amp; Feedbacks</a>
-      <a href="student_software.php" class="snav-btn"><span class="ico">💻</span> Software Availability</a>
-      <a href="student_pc_availability.php" class="snav-btn"><span class="ico">🖥️</span> PC Availability</a>
-      <a href="student_notifications.php" class="snav-btn">
-        <span class="ico">🔔</span> Notification
-        <?php if ($unread_count > 0): ?><span class="snav-badge"><?= $unread_count ?></span><?php endif; ?>
-      </a>
-      <?php if ($resEnabled): ?>
-        <a href="student_reservation.php" class="snav-btn"><span class="ico">🔖</span> Reservation</a>
-      <?php else: ?>
-        <span class="snav-btn disabled-link"><span class="ico">🔖</span> Reservation <small style="font-size:10px;margin-left:auto;opacity:0.6;">Disabled</small></span>
-      <?php endif; ?>
-    </div>
+
   </aside>
 
   <!-- MIDDLE: Announcements -->

@@ -107,20 +107,7 @@ $conn->close();
     <h1>College of Computer Studies Sit-in Monitoring System</h1>
     <img src="ucmainccslogo.png" alt="CCS Logo" class="logo"/>
   </header>
-  <nav class="top-nav">
-    <div class="notif-wrap">
-      <a href="student_notifications.php">🔔 Notifications</a>
-      <?php if ($unread_count > 0): ?>
-        <span class="notif-badge"><?= $unread_count ?></span>
-      <?php endif; ?>
-    </div>
-    <a href="student_dashboard.php">Home</a>
-    <a href="student_edit_profile.php" class="active">Edit Profile</a>
-    <a href="student_history.php">History</a>
-    <a href="student_reservation.php">Reservation</a>
-    <span class="spacer"></span>
-    <a href="student_logout.php" class="logout">Log out</a>
-  </nav>
+  <?php include 'nav_student.php'; ?>
   <main>
     <section class="form-container" style="max-width:480px;">
       <h2>✏️ Edit Profile</h2>
