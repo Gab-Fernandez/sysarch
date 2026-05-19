@@ -85,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['start_sitin'])) {
 
 // ── End sit-in ────────────────────────────────────────────────
 if (isset($_GET['end'])) {
-    $sit_id=$intval($_GET['end'] ?? 0);
     $sit_id=intval($_GET['end']);
     $timeout=date('Y-m-d H:i:s');
     $stmt=$conn->prepare("UPDATE sit_in SET status='done',time_out=? WHERE sit_id=?");
@@ -255,6 +254,8 @@ $records     = $conn->query("SELECT s.*,u.firstname,u.lastname,u.remaining_sessi
   <a href="admin_reports.php">Reports</a>
   <a href="admin_feedback.php">Feedback</a>
   <a href="admin_reservation.php">Reservation</a>
+  <a href="admin_leaderboard.php">Leaderboard</a>
+  <a href="admin_analytics.php">Analytics</a>
   <a href="admin_logout.php" class="logout-btn">Log out</a>
 </nav>
 

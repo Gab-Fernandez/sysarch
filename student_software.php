@@ -40,8 +40,13 @@ if ($selected_lab) {
 }
 
 // Stats
-$totalSoftware    = $conn->query("SELECT COUNT(*) as c FROM lab_software WHERE status='available'")->fetch_assoc()['c'];
-$totalLabs        = $conn->query("SELECT COUNT(DISTINCT lab) as c FROM lab_software")->fetch_assoc()['c'];
+$totalSoftware = $conn->query("SELECT COUNT(*) as c FROM lab_software WHERE status='available'")->fetch_assoc()['c'];
+$totalLabs     = $conn->query("SELECT COUNT(DISTINCT lab) as c FROM lab_software")->fetch_assoc()['c'];
+
+// Pre-fetch software counts per lab (avoids opening a new DB connection per lab in the loop)
+$labCountsRaw = $conn->query("SELECT lab, COUNT(*) as c FROM lab_software WHERE status='available' GROUP BY lab");
+$labCounts = [];
+while ($r = $labCountsRaw->fetch_assoc()) { $labCounts[$r['lab']] = (int)$r['c']; }
 
 $conn->close();
 
@@ -181,10 +186,7 @@ foreach($software as $sw) {
     <div class="lab-sidebar">
       <div class="lab-sidebar-title">Select a Lab</div>
       <?php foreach($labs as $lab):
-        $cnt = $conn2 = new mysqli("localhost","root","","sit_in_system");
-        $cq  = $conn2->query("SELECT COUNT(*) as c FROM lab_software WHERE lab='".addslashes($lab)."' AND status='available'");
-        $cnt_val = $cq ? $cq->fetch_assoc()['c'] : 0;
-        $conn2->close();
+        $cnt_val = $labCounts[$lab] ?? 0;
       ?>
         <a href="student_software.php?lab=<?= urlencode($lab) ?>"
            class="lab-btn <?= $selected_lab===$lab?'active':'' ?>">
