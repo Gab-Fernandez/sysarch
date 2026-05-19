@@ -250,7 +250,7 @@ $records     = $conn->query("SELECT s.*,u.firstname,u.lastname,u.remaining_sessi
   <a href="admin_search.php">Search</a>
   <a href="admin_students.php">Students</a>
   <a href="admin_sitin.php" class="active">Sit-in</a>
-  <a href="admin_sitin_records.php">View View Sit-in Records</a>
+  <a href="admin_sitin_records.php">View Sit-in Records</a>
   <a href="admin_reports.php">Reports</a>
   <a href="admin_feedback.php">Feedback</a>
   <a href="admin_reservation.php">Reservation</a>
