@@ -61,24 +61,10 @@ $totalMins=(int)$srow['tm']; $totalSess=(int)$srow['tc'];
 function fmtM($m){ if($m<=0)return'0m'; $h=floor($m/60); $r=$m%60; return $h>0?"{$h}h {$r}m":"{$r}m"; }
 
 // Reservation enabled check
-// Reservation enabled check
 $resEnabled = true;
-
-// Check if system_settings table exists first
-$checkTable = $conn->query("SHOW TABLES LIKE 'system_settings'");
-
-if ($checkTable && $checkTable->num_rows > 0) {
-
-    $resRow = $conn->query("
-        SELECT setting_value 
-        FROM system_settings 
-        WHERE setting_key='reservation_enabled' 
-        LIMIT 1
-    ");
-
-    if ($resRow && $resRow->num_rows > 0) {
-        $resEnabled = ($resRow->fetch_assoc()['setting_value'] === '1');
-    }
+$resRow = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key='reservation_enabled' LIMIT 1");
+if ($resRow && $resRow->num_rows > 0) {
+    $resEnabled = ($resRow->fetch_assoc()['setting_value'] === '1');
 }
 
 $conn->close();
@@ -141,6 +127,15 @@ $sess_color = $sess_left<=5?'#e74c3c':($sess_left<=10?'#f39c12':'#27ae60');
     .session-num{font-size:22px;font-weight:800;line-height:1;color:<?= $sess_color ?>;}
     .session-label{font-size:10.5px;color:rgba(255,255,255,0.45);font-weight:600;}
 
+    /* Sidebar nav */
+    .sidebar-nav{padding:0 14px 18px;display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+    .sidebar-nav-title{font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;}
+    .snav-btn{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,0.06);color:#b8d0f5;text-decoration:none;padding:9px 12px;border-radius:7px;font-size:12.5px;font-weight:600;transition:background 0.15s,color 0.15s;position:relative;}
+    .snav-btn:hover{background:rgba(255,255,255,0.13);color:#fff;}
+    .snav-btn .ico{font-size:14px;flex-shrink:0;}
+    .snav-badge{margin-left:auto;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:1px 7px;min-width:20px;text-align:center;}
+    .snav-btn.disabled-link{opacity:0.4;cursor:not-allowed;pointer-events:none;}
+
     /* MIDDLE */
     .mid-panel{background:var(--card);display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;}
     .panel-header{background:linear-gradient(135deg,#1234a0,var(--mid));color:#fff;padding:11px 18px;font-size:13px;font-weight:700;border-bottom:2px solid #071d3a;flex-shrink:0;display:flex;align-items:center;gap:7px;}
@@ -184,6 +179,7 @@ $sess_color = $sess_left<=5?'#e74c3c':($sess_left<=10?'#f39c12':'#27ae60');
   <a href="student_edit_profile.php">✏️ Edit Profile</a>
   <a href="student_history.php">📋 History &amp; Feedback</a>
   <a href="student_software.php">💻 Software</a>
+  <a href="student_pc_availability.php">🖥️ PC Availability</a>
   <div class="notif-wrap">
     <a href="student_notifications.php">🔔 Notification</a>
     <?php if ($unread_count > 0): ?><span class="notif-badge"><?= $unread_count ?></span><?php endif; ?>
@@ -228,6 +224,25 @@ $sess_color = $sess_left<=5?'#e74c3c':($sess_left<=10?'#f39c12':'#27ae60');
       <div class="info-row"><span class="info-icon">📊</span><div><span class="info-label">Total Sit-in Hours</span><span class="info-value" style="font-weight:700;color:#93c5fd;"><?= fmtM($totalMins) ?> (<?= $totalSess ?> sessions)</span></div></div>
     </div>
 
+    <div class="divider"></div>
+    <div class="sidebar-nav">
+      <div class="sidebar-nav-title">Quick Access</div>
+      <a href="student_edit_profile.php" class="snav-btn"><span class="ico">✏️</span> Edit Profile</a>
+      <a href="student_dashboard.php#announcements" class="snav-btn"><span class="ico">📢</span> View Announcement</a>
+      <a href="student_dashboard.php#rules" class="snav-btn"><span class="ico">📋</span> Lab Rules &amp; Regulation</a>
+      <a href="student_history.php" class="snav-btn"><span class="ico">📁</span> History &amp; Feedbacks</a>
+      <a href="student_software.php" class="snav-btn"><span class="ico">💻</span> Software Availability</a>
+      <a href="student_pc_availability.php" class="snav-btn"><span class="ico">🖥️</span> PC Availability</a>
+      <a href="student_notifications.php" class="snav-btn">
+        <span class="ico">🔔</span> Notification
+        <?php if ($unread_count > 0): ?><span class="snav-badge"><?= $unread_count ?></span><?php endif; ?>
+      </a>
+      <?php if ($resEnabled): ?>
+        <a href="student_reservation.php" class="snav-btn"><span class="ico">🔖</span> Reservation</a>
+      <?php else: ?>
+        <span class="snav-btn disabled-link"><span class="ico">🔖</span> Reservation <small style="font-size:10px;margin-left:auto;opacity:0.6;">Disabled</small></span>
+      <?php endif; ?>
+    </div>
   </aside>
 
   <!-- MIDDLE: Announcements -->
