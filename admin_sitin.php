@@ -84,11 +84,21 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['start_sitin'])) {
 
 // ── End sit-in ────────────────────────────────────────────────
 if (isset($_GET['end'])) {
-    $sit_id=intval($_GET['end']);
-    $timeout=date('Y-m-d H:i:s');
-    $stmt=$conn->prepare("UPDATE sit_in SET status='done',time_out=? WHERE sit_id=?");
-    $stmt->bind_param("si",$timeout,$sit_id); $stmt->execute(); $stmt->close();
-    header("Location: admin_sitin.php"); exit();
+    $sit_id = intval($_GET['end']);
+    $timeout = date('Y-m-d H:i:s');
+
+    $stmt = $conn->prepare(
+        "UPDATE sit_in
+         SET status='done', time_out=?
+         WHERE sit_id=? AND status='active'"
+    );
+
+    $stmt->bind_param("si", $timeout, $sit_id);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: admin_sitin.php?ended=1");
+    exit();
 }
 
 // ── Pagination & search ───────────────────────────────────────

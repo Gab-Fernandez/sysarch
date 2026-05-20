@@ -4,7 +4,7 @@ echo "<nav class=\"top-nav\">\n";
 $students = [
   'student_dashboard.php' => '🏠 Home',
   'student_edit_profile.php' => '✏️ Edit Profile',
-  'student_history.php' => '📋 History',
+  'student_history.php' => '📋 History & Feedback',
   'student_software.php' => '💻 Software',
   'student_pc_availability.php' => '🖥️ PC Availability',
 ];

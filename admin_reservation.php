@@ -186,7 +186,7 @@ $showPc   = ($hasPcCol && $hasPcCol->num_rows > 0);
       background:#dc2626; color:#fff; padding:5px 12px;
       border:none; border-radius:6px; cursor:pointer;
       font-size:0.8rem; font-weight:700; text-decoration:none;
-      display:inline-block; margin-left:5px; transition:opacity 0.15s;
+      display:inline-block; transition:opacity 0.15s;
     }
     .btn-reject:hover { opacity:0.85; }
     .btn-start {

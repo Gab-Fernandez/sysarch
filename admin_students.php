@@ -132,8 +132,8 @@ $courses = ['BS Computer Science','BS Information Technology','BS Computer Engin
     td { padding:9px 12px; border-bottom:1px solid #e5e9f0; }
     tr:hover td { background:#f0f6ff; }
     .btn-edit   { background:#1a5276; color:#fff; padding:4px 12px; border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; text-decoration:none; }
-    .btn-delete { background:#e74c3c; color:#fff; padding:4px 12px; border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; text-decoration:none; margin-left:4px; }
-    .btn-reset  { background:#f39c12; color:#fff; padding:4px 10px; border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; text-decoration:none; margin-left:4px; }
+    .btn-delete { background:#e74c3c; color:#fff; padding:4px 12px; border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; text-decoration:none; }
+    .btn-reset  { background:#f39c12; color:#fff; padding:4px 10px; border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; text-decoration:none; }
     .pagination-info { font-size:0.85rem; color:#666; margin-top:10px; }
     .pagination { display:flex; gap:4px; margin-top:8px; flex-wrap:wrap; }
     .pagination a, .pagination span { padding:5px 11px; border:1px solid #ccc; border-radius:4px; text-decoration:none; font-size:0.85rem; color:#1a5276; }

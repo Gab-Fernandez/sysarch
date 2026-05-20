@@ -26,11 +26,10 @@ $pc_count = $labs[$selected_lab];
 // ── 1. Active sit-ins (highest priority — always occupied) ────
 $sitin_pcs = [];
 $sq = $conn->query("
-    SELECT pc_number FROM sit_in
-    WHERE lab = '$selected_lab'
-      AND status = 'active'
-      AND pc_number IS NOT NULL
-      AND pc_number != ''
+SELECT DISTINCT pc_number FROM sit_in
+WHERE lab = '$selected_lab'
+  AND status = 'active'
+  AND TRIM(pc_number) != ''
 ");
 if ($sq) while ($r = $sq->fetch_assoc()) $sitin_pcs[] = $r['pc_number'];
 
@@ -51,7 +50,8 @@ if ($hasPcCol && $hasPcCol->num_rows > 0) {
           AND status IN ('approved', 'pending')
           AND pc_number IS NOT NULL
           AND pc_number != ''
-          AND end_time > '$nowTime'
+          AND start_time <= '$nowTime'
+          AND end_time >= '$nowTime'
     ");
     if ($rq) {
         while ($r = $rq->fetch_assoc()) {
@@ -237,20 +237,7 @@ function getPcStatus($pcLabel, $sitin, $reserved, $unavailable) {
   <h1>College of Computer Studies Sit-in Monitoring System</h1>
   <img src="ucmainccslogo.png" alt="CCS Logo" class="logo"/>
 </header>
-<nav class="top-nav">
-  <a href="student_dashboard.php">🏠 Home</a>
-  <a href="student_edit_profile.php">✏️ Profile</a>
-  <a href="student_history.php">📋 History</a>
-  <a href="student_reservation.php">🔖 Reservation</a>
-  <a href="student_software.php">💻 Software</a>
-  <a href="student_pc_availability.php" class="active">🖥️ PC Availability</a>
-  <div class="notif-wrap">
-    <a href="student_notifications.php">🔔 Notification</a>
-    <?php if ($unread_count > 0): ?><span class="notif-badge"><?= $unread_count ?></span><?php endif; ?>
-  </div>
-  <span class="spacer"></span>
-  <a href="student_logout.php" class="logout">Log out</a>
-</nav>
+<?php include 'nav_student.php'; ?>
 
 <main>
 <div class="page-wrap">

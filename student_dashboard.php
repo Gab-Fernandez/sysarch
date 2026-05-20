@@ -98,7 +98,7 @@ $sess_color = $sess_left<=5?'#e74c3c':($sess_left<=10?'#f39c12':'#27ae60');
     .top-nav a:hover{color:#fff;background:rgba(255,255,255,0.06);border-bottom-color:var(--light);}
     .top-nav a.active{color:#fff;border-bottom-color:#60a5fa;font-weight:700;}
     .top-nav .spacer{flex:1;}
-    .top-nav .logout{background:#b91c1c;color:#fff!important;padding:10px 18px;border-bottom-color:transparent;font-weight:700;margin-left:4px;}
+    .top-nav .logout{background:#b91c1c;color:#fff!important;padding:10px 18px;border-bottom-color:transparent;font-weight:700;}
     .top-nav .logout:hover{background:#991b1b;}
     .notif-wrap{position:relative;display:inline-flex;}
     .notif-badge{position:absolute;right:2px;top:5px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;border:2px solid var(--navy);}
@@ -168,24 +168,7 @@ $sess_color = $sess_left<=5?'#e74c3c':($sess_left<=10?'#f39c12':'#27ae60');
   <img src="ucmainccslogo.png" alt="CCS Logo"/>
 </div>
 
-<nav class="top-nav">
-  <a href="student_dashboard.php" class="active">🏠 Home</a>
-  <a href="student_edit_profile.php">✏️ Edit Profile</a>
-  <a href="student_history.php">📋 History &amp; Feedback</a>
-  <a href="student_software.php">💻 Software</a>
-  <a href="student_pc_availability.php">🖥️ PC Availability</a>
-  <div class="notif-wrap">
-    <a href="student_notifications.php">🔔 Notification</a>
-    <?php if ($unread_count > 0): ?><span class="notif-badge"><?= $unread_count ?></span><?php endif; ?>
-  </div>
-  <?php if ($resEnabled): ?>
-    <a href="student_reservation.php">🔖 Reservation</a>
-  <?php else: ?>
-    <a href="#" style="opacity:0.45;cursor:not-allowed;" title="Reservations are currently disabled">🔖 Reservation</a>
-  <?php endif; ?>
-  <span class="spacer"></span>
-  <a href="student_logout.php" class="logout">Log out</a>
-</nav>
+<?php include 'nav_student.php'; ?>
 
 <div class="page-body">
   <!-- LEFT: Student Profile -->

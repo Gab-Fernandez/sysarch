@@ -108,8 +108,9 @@ $conn->close();
   </header>
   <?php include 'nav_student.php'; ?>
   <main>
-    <section class="form-container" style="max-width:480px;">
-      <h2>✏️ Edit Profile</h2>
+    <div class="page-wrap">
+      <section class="form-container" style="max-width:480px;">
+        <h2>✏️ Edit Profile</h2>
 
       <?php if ($message): ?>
         <div class="msg-<?= $message_type ?>"><?= htmlspecialchars($message) ?></div>
@@ -160,6 +161,7 @@ $conn->close();
         <button type="submit">Save Changes</button>
       </form>
     </section>
+    </div>
   </main>
 </body>
 </html>

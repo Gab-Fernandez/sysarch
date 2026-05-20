@@ -57,8 +57,9 @@ $conn->close();
   </header>
   <?php include 'nav_student.php'; ?>
   <main>
-    <div class="notif-container">
-      <h2 style="margin-bottom:20px; color:#1a3a6b;">🔔 Notifications</h2>
+    <div class="page-wrap">
+      <div class="notif-container">
+        <h2 style="margin-bottom:20px; color:#1a3a6b;">🔔 Notifications</h2>
       <?php if ($notifs && $notifs->num_rows > 0):
         while ($n = $notifs->fetch_assoc()): ?>
         <div class="notif-item">
@@ -68,6 +69,7 @@ $conn->close();
       <?php endwhile; else: ?>
         <div class="empty">📭 No notifications yet.</div>
       <?php endif; ?>
+      </div>
     </div>
   </main>
 </body>

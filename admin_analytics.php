@@ -154,7 +154,7 @@ while ($r = $labHoursResult->fetch_assoc()) {
     .top-lab-banner .tl-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; }
     .top-lab-banner .tl-name  { font-size: 1.6rem; font-weight: 800; }
     .top-lab-banner .tl-count { font-size: 0.9rem; opacity: 0.85; }
-    .top-lab-banner .tl-right { margin-left: auto; }
+    .top-lab-banner .tl-right { }
     .lab-rank-list { display: flex; flex-direction: column; gap: 4px; }
     .lab-rank-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }
     .lab-rank-bar  { flex: 1; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; }
