@@ -4,7 +4,7 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: admin_login.php");
     exit();
 }
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
+require_once 'config.php';
 
 $searchResult = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {

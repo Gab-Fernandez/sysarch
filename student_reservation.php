@@ -2,8 +2,7 @@
 session_start();
 if (!isset($_SESSION['student_id'])) { header("Location: index.php"); exit(); }
 
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require_once 'config.php';
 
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->bind_param("i", $_SESSION['student_id']); $stmt->execute();
@@ -23,13 +22,17 @@ if ($chkTbl && $chkTbl->num_rows > 0) {
         $resEnabled = ($resRow->fetch_assoc()['setting_value'] === '1');
 }
 
-$labs = ['524','526','528','530','542','Mac Lab','Lab 1','Lab 2','Lab 3','Lab 4','Lab 5','Lab 6'];
+$labs = ['524','526','528','530','542','Mac Lab'];
 $purposes = ['Programming','Research','Online Class','Project','Assignment','Printing','Internet','C#','C','Java','ASP.Net','PHP','Other'];
 
 // PC counts per lab
 $lab_pc_counts = [
-    '524'=>50,'526'=>50,'528'=>50,'530'=>50,'542'=>50,'Mac Lab'=>20,
-    'Lab 1'=>30,'Lab 2'=>30,'Lab 3'=>30,'Lab 4'=>30,'Lab 5'=>30,'Lab 6'=>30,
+    '524'=>50,
+    '526'=>50,
+    '528'=>50,
+    '530'=>50,
+    '542'=>50,
+    'Mac Lab'=>20
 ];
 
 $message = ""; $message_type = "";

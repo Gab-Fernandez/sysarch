@@ -23,18 +23,45 @@ $selected_lab = isset($_GET['lab']) ? $_GET['lab'] : array_key_first($labs);
 if (!array_key_exists($selected_lab, $labs)) $selected_lab = array_key_first($labs);
 $pc_count = $labs[$selected_lab];
 
-// Get active sit-ins for selected lab (with pc_number)
+// ── 1. Active sit-ins (highest priority — always occupied) ────
 $sitin_pcs = [];
-$sq = $conn->query("SELECT pc_number FROM sit_in WHERE lab = '$selected_lab' AND status = 'active' AND pc_number IS NOT NULL AND pc_number != ''");
+$sq = $conn->query("
+    SELECT pc_number FROM sit_in
+    WHERE lab = '$selected_lab'
+      AND status = 'active'
+      AND pc_number IS NOT NULL
+      AND pc_number != ''
+");
 if ($sq) while ($r = $sq->fetch_assoc()) $sitin_pcs[] = $r['pc_number'];
 
-// Get approved/pending reservations for today for selected lab
+// ── 2. Reservations that overlap RIGHT NOW today ──────────────
+// Shows as "Reserved" if approved/pending and time overlaps current time
+// (excludes PCs already counted as active sit-in)
 $reserved_pcs = [];
-$today = date('Y-m-d');
+$today   = date('Y-m-d');
+$nowTime = date('H:i:s');
+
 $hasPcCol = $conn->query("SHOW COLUMNS FROM reservations LIKE 'pc_number'");
 if ($hasPcCol && $hasPcCol->num_rows > 0) {
-    $rq = $conn->query("SELECT pc_number FROM reservations WHERE lab = '$selected_lab' AND reservation_date = '$today' AND status IN ('approved','pending') AND pc_number IS NOT NULL AND pc_number != ''");
-    if ($rq) while ($r = $rq->fetch_assoc()) $reserved_pcs[] = $r['pc_number'];
+    // Show reserved if: today's date AND time window covers now OR is upcoming today AND approved/pending
+    $rq = $conn->query("
+        SELECT pc_number FROM reservations
+        WHERE lab = '$selected_lab'
+          AND reservation_date = '$today'
+          AND status IN ('approved', 'pending')
+          AND pc_number IS NOT NULL
+          AND pc_number != ''
+          AND end_time > '$nowTime'
+    ");
+    if ($rq) {
+        while ($r = $rq->fetch_assoc()) {
+            $pc = $r['pc_number'];
+            // Only mark reserved if NOT already an active sit-in
+            if (!in_array($pc, $sitin_pcs)) {
+                $reserved_pcs[] = $pc;
+            }
+        }
+    }
 }
 
 // Get manually marked unavailable PCs (from lab_software table repurposed, or system_settings)
@@ -210,7 +237,20 @@ function getPcStatus($pcLabel, $sitin, $reserved, $unavailable) {
   <h1>College of Computer Studies Sit-in Monitoring System</h1>
   <img src="ucmainccslogo.png" alt="CCS Logo" class="logo"/>
 </header>
-<?php include 'nav_student.php'; ?>
+<nav class="top-nav">
+  <a href="student_dashboard.php">🏠 Home</a>
+  <a href="student_edit_profile.php">✏️ Profile</a>
+  <a href="student_history.php">📋 History</a>
+  <a href="student_reservation.php">🔖 Reservation</a>
+  <a href="student_software.php">💻 Software</a>
+  <a href="student_pc_availability.php" class="active">🖥️ PC Availability</a>
+  <div class="notif-wrap">
+    <a href="student_notifications.php">🔔 Notification</a>
+    <?php if ($unread_count > 0): ?><span class="notif-badge"><?= $unread_count ?></span><?php endif; ?>
+  </div>
+  <span class="spacer"></span>
+  <a href="student_logout.php" class="logout">Log out</a>
+</nav>
 
 <main>
 <div class="page-wrap">

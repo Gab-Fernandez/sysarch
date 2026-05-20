@@ -2,8 +2,7 @@
 session_start();
 if (!isset($_SESSION['student_id'])) { header("Location: index.php"); exit(); }
 
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require_once 'config.php';
 
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->bind_param("i", $_SESSION['student_id']);

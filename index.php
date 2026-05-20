@@ -2,8 +2,7 @@
 session_start();
 if (isset($_SESSION['student_id'])) { header("Location: student_dashboard.php"); exit(); }
 
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require_once 'config.php';
 
 $error = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

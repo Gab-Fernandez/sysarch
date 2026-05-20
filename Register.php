@@ -1,6 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require_once 'config.php';
 
 $error = "";
 
@@ -112,7 +111,7 @@ $courses = [
 
         <label for="courselevel">Year Level <span style="color:#e74c3c;">*</span></label>
         <select id="courselevel" name="courselevel" required>
-          <?php for ($y = 1; $y <= 5; $y++): ?>
+          <?php for ($y = 1; $y <= 4; $y++): ?>
             <option value="<?= $y ?>" <?= (($_POST['courselevel'] ?? 1) == $y) ? 'selected' : '' ?>>
               Year <?= $y ?>
             </option>

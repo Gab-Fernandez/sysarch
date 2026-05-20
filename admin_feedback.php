@@ -2,8 +2,7 @@
 session_start();
 if (!isset($_SESSION['admin_id'])) { header("Location: admin_login.php"); exit(); }
 
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require_once 'config.php';
 
 // Create feedback table if not exists
 $conn->query("CREATE TABLE IF NOT EXISTS feedback (

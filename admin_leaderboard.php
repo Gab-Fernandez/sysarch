@@ -2,8 +2,7 @@
 session_start();
 if (!isset($_SESSION['admin_id'])) { header("Location: admin_login.php"); exit(); }
 
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require_once 'config.php';
 
 // ── Leaderboard: total sit-in hours per student ───────────────
 // Uses TIMESTAMPDIFF on session_date vs time_out; excludes active/no-timeout rows

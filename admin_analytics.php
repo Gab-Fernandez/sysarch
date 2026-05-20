@@ -2,8 +2,7 @@
 session_start();
 if (!isset($_SESSION['admin_id'])) { header("Location: admin_login.php"); exit(); }
 
-$conn = new mysqli("localhost", "root", "", "sit_in_system");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require_once 'config.php';
 
 // ── Date filter ───────────────────────────────────────────────
 $date_from = (isset($_GET['from']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['from']))

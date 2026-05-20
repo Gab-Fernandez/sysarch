@@ -6,12 +6,11 @@ $conn = new mysqli("localhost", "root", "", "sit_in_system");
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $message = ""; $message_type = "";
-$labs     = ['Lab 1','Lab 2','Lab 3','Lab 4','Lab 5','Lab 6','524','526','528','530','542','Mac Lab'];
+$labs     = ['524','526','528','530','542','Mac Lab'];
 $purposes = ['C#','C','Java','ASP.Net','PHP','Programming','Research','Online Class','Project','Assignment','Printing','Internet','Other'];
 
 // PC counts per lab — adjust to match your actual setup
 $lab_pc_counts = [
-    'Lab 1'=>30,'Lab 2'=>30,'Lab 3'=>30,'Lab 4'=>30,'Lab 5'=>30,'Lab 6'=>30,
     '524'=>40,'526'=>40,'528'=>40,'530'=>40,'542'=>40,'Mac Lab'=>20,
 ];
 
@@ -244,9 +243,20 @@ $records     = $conn->query("SELECT s.*,u.firstname,u.lastname,u.remaining_sessi
   <img src="uclogo.png" alt="UC Logo" class="logo"/>
   <h1>College of Computer Studies Admin</h1>
   <img src="ucmainccslogo.png" alt="CCS Logo" class="logo"/>
-
 </header>
-<?php include 'nav_admin.php'; ?>
+<nav>
+  <a href="admin_dashboard.php">Home</a>
+  <a href="admin_search.php">Search</a>
+  <a href="admin_students.php">Students</a>
+  <a href="admin_sitin.php" class="active">Sit-in</a>
+  <a href="admin_sitin_records.php">Sit-in Records</a>
+  <a href="admin_reports.php">Reports</a>
+  <a href="admin_feedback.php">Feedback</a>
+  <a href="admin_reservation.php">Reservation</a>
+  <a href="admin_leaderboard.php">Leaderboard</a>
+  <a href="admin_analytics.php">Analytics</a>
+  <a href="admin_logout.php" class="logout-btn">Log out</a>
+</nav>
 
 <main>
   <?php if ($message): ?>
